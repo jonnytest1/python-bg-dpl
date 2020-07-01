@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <script src="gpio/index.js"></script>
+        <meta charset="UTF-8">
+        <style>
+            .bigbutton {
+                height: 100px;
+                width: 400px;
+            }
+        </style>
+    </head>
+
+    <body>
+        fan:
+        <button class="bigbutton" path="/gpio" onclick="enablePin(event)">enable</button>
+        <br>
+        servo:
+        <input type="range" path="/gpio/servo" oninput="enablePin(event)" />
+        <br>
+
+        <img
+            src="https://www.raspberrypi-spy.co.uk/wp-content/uploads/2012/06/Raspberry-Pi-GPIO-Header-with-Photo.png" />
+    </body>
+
+</html>
