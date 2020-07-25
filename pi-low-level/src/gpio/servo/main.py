@@ -1,5 +1,5 @@
 # pylint: disable=import-error
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from servocontrol import p
 from customlogging import logKibana
 from time import sleep
@@ -26,7 +26,7 @@ def main(method, path, data, request):
         p.ChangeDutyCycle(frequency)
         sleep(0.5)
         p.ChangeDutyCycle(0)
+        p.stop()
     except KeyboardInterrupt:
         p.stop()
-
     return "hallo"
