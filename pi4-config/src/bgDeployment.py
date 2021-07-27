@@ -3,42 +3,40 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from service import Service
+from typing import List
+from services import serviceList
 
+nginxPath = "/etc/nginx/conf.d/"
 
-services:list[Service]=[
-    Service("",""),
-    Service("",""),
-]
+observerList: List[Observer] = []
 
-observerList:list[Observer]=[]
-
-
-
-for service in services:
-    patterns = ["*"]
+for service in serviceList:
+    patterns = [service.pattern]
     ignore_patterns = None
     ignore_directories = True
     case_sensitive = True
     path = service.folderPath
     go_recursively = True
 
-    my_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
-
-    def relevant_change():
-        service.restart();
+    my_event_handler = PatternMatchingEventHandler(
+        patterns, ignore_patterns, ignore_directories, case_sensitive)
 
     def on_created(event):
         print(f"hey, {event.src_path} has been created!")
+        service.triggerChange(event.src_path)
 
     def on_deleted(event):
         print(f"what the f**k! Someone deleted {event.src_path}!")
+        service.triggerChange(event.src_path)
 
     def on_modified(event):
         print(f"hey buddy, {event.src_path} has been modified")
+        service.triggerChange(event.src_path)
 
     def on_moved(event):
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
-
+        if not service.triggerChange(event.src_path):
+            service.triggerChange(event.dest_path)
 
     my_event_handler.on_created = on_created
     my_event_handler.on_deleted = on_deleted

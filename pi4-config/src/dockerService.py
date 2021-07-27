@@ -1,18 +1,23 @@
 import os
 import re
 
-def get_run_command(imageName:str):
-    stream= os.popen('docker inspect --format "$(cat ./dockerrun.tpl)" '+imageName)
-    output=stream.read()
-    return output
+from dockerInstance import DockerInstance
 
-def run_docker(image:str,volumePath):
-    command=get_run_command(image)
-    command=re.sub(r'--publish "0.0.0.0:([0-9]*):([0-9]*)/t',r'+-publish "0.0.0.0:20000-30000:\g<2>/t',command)
+
+def get_all_instances():
+    stream = os.popen('docker ps -a')
+    lines = stream.readlines()
+    return list(map(lambda l: DockerInstance(outPutLine=l),  lines[1:]))
+
+
+def run_docker(image: str, volumePath):
+    command = get_run_command(image)
+    command = re.sub(r'--publish "0.0.0.0:([0-9]*):([0-9]*)/t',
+                     r'+-publish "0.0.0.0:20000-30000:\g<2>/t', command)
     command.replace()
 
-    stream= os.popen('docker run -d '+image)
-    output=stream.read()
+    stream = os.popen('docker run -d '+image)
+    output = stream.read()
 
     """    
     \
