@@ -4,6 +4,7 @@ import asyncio
 from FileChangeEvent import FileChangeEvent
 
 from ServiceCl import ServiceCl
+from customlogging import LogLevel, logKibana
 
 
 class AsyncEventHandler(PatternMatchingEventHandler):
@@ -19,20 +20,18 @@ class AsyncEventHandler(PatternMatchingEventHandler):
     def addToQueue(self, path):
         self.loop.call_soon_threadsafe(
             self.queue.put_nowait, FileChangeEvent(path=path, service=self.service))
+        logKibana(LogLevel.INFO, "file change event")
 
     def on_created(self, event: FileSystemEvent):
         self.addToQueue(event.src_path)
 
     def on_deleted(self, event):
-        #print(f"what the f**k! Someone deleted {event.src_path}!")
         self.addToQueue(event.src_path)
 
     def on_modified(self, event):
-       # print(f"hey buddy, {event.src_path} has been modified")
         self.addToQueue(event.src_path)
 
     def on_moved(self, event):
-        #print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
         self.addToQueue(event.src_path)
         self.addToQueue(event.dest_path)
 
@@ -49,7 +48,7 @@ class EventIterator(object):
         item = await self.queue.get()
 
         if item is None:
-            print("item is None")
+            logKibana(LogLevel.ERROR, "None in event loop")
             raise StopAsyncIteration
 
         return item

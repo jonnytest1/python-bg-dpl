@@ -1,9 +1,7 @@
 from HealthCheck import HealthCheck
 from customlogging import LogLevel, logKibana
 from dockerInstance import DockerInstance
-from dockerService import get_all_instances
 import re
-import asyncio
 from nginxService import NginxService
 
 allinstances = []
@@ -32,7 +30,7 @@ class ServiceCl:
         if (not self.blacklistPattern == None) and (not re.match(f".*{self.blacklistPattern}.*", path) == None):
             print(f"{path} filtered by blacklist {self.blacklistPattern}")
             return False
-        print(f"change in {self.dockerName}")
+        logKibana(LogLevel.INFO, f"restarting for {self.dockerName}")
         await self.restart(path)
         self.reloading = False
         return True

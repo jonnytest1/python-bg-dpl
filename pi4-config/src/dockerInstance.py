@@ -2,8 +2,6 @@
 import re
 import os
 from typing import List
-from requests import status_codes
-import time
 
 from dockerService import getRunCommand, getStatusForContainer, get_all_instances
 
@@ -71,7 +69,6 @@ class DockerInstance:
 
         newName = f"{name}_{suffix}"
 
-        print(len(instanceList))
         print(newName)
         replacedName = re.sub(
             r'--name "/(.*)"', f'--name "/{newName}"', replacedPorts)

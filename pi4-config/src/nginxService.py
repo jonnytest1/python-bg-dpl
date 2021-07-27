@@ -9,9 +9,10 @@ nginxPath = "/etc/nginx/locations"
 
 class NginxService:
 
-    def updateConfig(self, service: "ServiceCl.ServiceCl", instance: DockerInstance):
+    def updateConfig(self, service: "ServiceCl.ServiceCl", instance: "DockerInstance"):
         file = f"{nginxPath}/{service.dockerName}.locations"
-        print(f"setting config on {file}")
+
+        logKibana(LogLevel.INFO, "updating config")
         with open(file, "r") as myfile:
             data: str = myfile.read()
             healthcheckPortIndex = int(service.healthcheckPath[1])
@@ -24,7 +25,8 @@ class NginxService:
         with open(file, "w") as myfile:
             myfile.write(newConfig)
 
-        print(f"setting config to \n{newConfig}")
+        logKibana(LogLevel.INFO, "updating config",
+                  None, dict(config=newConfig))
         self.reloadConfig()
 
     def reloadConfig(self):
@@ -36,4 +38,4 @@ class NginxService:
             logKibana(LogLevel.ERROR, "nginx didnt start correctly",
                       None, args=dict(status=statusStr.read()))
 
-        print("loading config")
+        print("reloaded config")

@@ -1,12 +1,13 @@
 import asyncio
 import requests
+from customlogging import LogLevel, logKibana
 
 from dockerInstance import DockerInstance
 
 
 class HealthCheck:
 
-    async def checkHealthy(self, healthCheckUrl: str, instance: DockerInstance):
+    async def checkHealthy(self, healthCheckUrl: str, instance: 'DockerInstance'):
         requestUtl = self.getRequestUrl(
             healthCheckUrl=healthCheckUrl, instance=instance)
         while not self.doHealthCheck(url=requestUtl):
@@ -17,12 +18,11 @@ class HealthCheck:
         print(f"checking url at {url}")
         try:
             response = requests.get(url)
-            print(response.status_code)
             return response.status_code >= 200 and response.status_code < 400
         except requests.ConnectionError:
             return False
 
-    def getRequestUrl(self, healthCheckUrl: str, instance: DockerInstance):
+    def getRequestUrl(self, healthCheckUrl: str, instance: 'DockerInstance'):
         requestUrl = healthCheckUrl
 
         if instance.ports == None:
