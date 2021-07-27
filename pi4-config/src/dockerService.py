@@ -1,46 +1,18 @@
 import os
-import re
-
-from dockerInstance import DockerInstance
 
 
 def get_all_instances():
     stream = os.popen('docker ps -a')
     lines = stream.readlines()
-    return list(map(lambda l: DockerInstance(outPutLine=l),  lines[1:]))
+    return lines[1:]
 
 
-def run_docker(image: str, volumePath):
-    command = get_run_command(image)
-    command = re.sub(r'--publish "0.0.0.0:([0-9]*):([0-9]*)/t',
-                     r'+-publish "0.0.0.0:20000-30000:\g<2>/t', command)
-    command.replace()
-
-    stream = os.popen('docker run -d '+image)
-    output = stream.read()
-
-    """    
-    \
-    --name hello-BLUE \
-    -v $(pwd)/hello.py:/usr/local/src/hello.py \
-    --net=example \
-     \
-    python:3 \
-    python /usr/local/src/hello.py 
+def getRunCommand(containername: str):
+    stream = os.popen(
+        'docker inspect --format "$(cat ./dockerrun.tpl)" '+containername)
+    return stream.read()
 
 
-
-    -p 20000-30000
-
-
-    then read from stats
-    """
-    print("running")
-
-
-def healthcheck():
-    print("health")
-
-
-def kill_docker():
-    print("kill contianer")
+def getStatusForContainer(containerName: str):
+    stream = os.popen(f'docker ps -a | grep -H {containerName}')
+    return stream.read()

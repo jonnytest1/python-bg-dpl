@@ -1,57 +1,49 @@
 import time
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
-
-from service import Service
+import asyncio
 from typing import List
+from FileChangeEvent import FileChangeEvent
+from ServiceCl import ServiceCl
+from asyncEventHandler import AsyncEventHandler, EventIterator
 from services import serviceList
-
-nginxPath = "/etc/nginx/conf.d/"
+from pathlib import Path
 
 observerList: List[Observer] = []
 
+loop = asyncio.get_event_loop()
+queue = asyncio.Queue(loop=loop)
+
+
+async def consume(queue: asyncio.Queue) -> None:
+    async for event in EventIterator(queue):
+        evt: FileChangeEvent = event
+        loop.create_task(evt.service.triggerChange(event.path))
+    print("consumer")
+
+
+def watch(service: ServiceCl, queue: asyncio.Queue, loop: asyncio.BaseEventLoop) -> None:
+    """Watch a directory for changes."""
+    handler = AsyncEventHandler(service, queue, loop)
+
+    observer = Observer()
+    observer.schedule(handler, service.folderPath, recursive=True)
+    observer.start()
+    print("Observer started")
+
+
+futureList = [
+    consume(queue)
+]
+
 for service in serviceList:
-    patterns = [service.pattern]
-    ignore_patterns = None
-    ignore_directories = True
-    case_sensitive = True
-    path = service.folderPath
-    go_recursively = True
+    futureList.append(loop.run_in_executor(None, watch, service, queue, loop))
 
-    my_event_handler = PatternMatchingEventHandler(
-        patterns, ignore_patterns, ignore_directories, case_sensitive)
 
-    def on_created(event):
-        print(f"hey, {event.src_path} has been created!")
-        service.triggerChange(event.src_path)
-
-    def on_deleted(event):
-        print(f"what the f**k! Someone deleted {event.src_path}!")
-        service.triggerChange(event.src_path)
-
-    def on_modified(event):
-        print(f"hey buddy, {event.src_path} has been modified")
-        service.triggerChange(event.src_path)
-
-    def on_moved(event):
-        print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
-        if not service.triggerChange(event.src_path):
-            service.triggerChange(event.dest_path)
-
-    my_event_handler.on_created = on_created
-    my_event_handler.on_deleted = on_deleted
-    my_event_handler.on_modified = on_modified
-    my_event_handler.on_moved = on_moved
-
-    my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=go_recursively)
-    observerList.append(my_observer)
-
-    my_observer.start()
 try:
-    while True:
-        time.sleep(1)
+    loop.run_until_complete(asyncio.gather(*futureList))
 except KeyboardInterrupt:
+    loop.stop()
     for observer in observerList:
         observer.stop()
         observer.join()

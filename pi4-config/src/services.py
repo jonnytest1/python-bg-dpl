@@ -1,10 +1,11 @@
-from service import Service
+from ServiceCl import ServiceCl
 
 
 serviceList = [
-    Service(folderPath="/var/www/mapserver/mapserver",
-            pattern="*",
-            blackListPattern="mapserver/public",
-            dockerName="docker_mapserver",
-            healthcheckPath="[1]/users.html")
+    ServiceCl(folderPath="/var/www/mapserver/mapserver",
+              pattern="*",
+              blackListPattern="mapserver/public",
+              dockerName="docker_mapserver",
+              healthcheckPath="[1]/users.html",
+              envDictionary=dict(SKIP_NPM="^(?!(.*)package\.json).*$"))
 ]

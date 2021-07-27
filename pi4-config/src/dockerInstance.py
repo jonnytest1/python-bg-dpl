@@ -1,9 +1,11 @@
+
 import re
 import os
 from typing import List
-import requests
 from requests import status_codes
 import time
+
+from dockerService import getRunCommand, getStatusForContainer, get_all_instances
 
 
 class DockerInstance:
@@ -31,19 +33,23 @@ class DockerInstance:
             self.ports.append(port.split(":")[1].split("->")[0])
 
     def loadPorts(self):
-        stream = os.popen(f'docker ps -a | grep -H {self.name}')
-        portString = stream.read()
+        portString = getStatusForContainer(self.name)
         self.parseOutPutLine(portString)
 
     def getRunCommand(self):
         if self.dockerRunCommand is None:
-            stream = os.popen(
-                'docker inspect --format "$(cat ./dockerrun.tpl)" '+self.name)
-            self.dockerRunCommand = stream.read()
+            self.dockerRunCommand = getRunCommand(self.name)
         return self.dockerRunCommand
 
-    def deploy(self):
-        stream = os.popen(self.getRunCommand())
+    def deploy(self, additionalEnvs: List[str]):
+        command = self.getRunCommand()
+
+        for env in additionalEnvs:
+            print(f"adding {env}")
+            command = command.replace(
+                "--env", f"--env \"{env}=TRUE\" \\\n\t--env", 1)
+
+        stream = os.popen(command)
         output = stream.read()
 
         if not len(output) == 65:
@@ -72,28 +78,6 @@ class DockerInstance:
 
         return DockerInstance(name=newName, image=self.image, runCommand=replacedName)
 
-    def checkHealthy(self, healthCheckUrl: str):
-        requestUtl = self.getRequestUrl(healthCheckUrl=healthCheckUrl)
-        while not self.doHealthCheck(url=requestUtl):
-            time.sleep(1)
-            continue
-
-    def doHealthCheck(self, url: str):
-        print(f"checking url at {url}")
-        try:
-            response = requests.get(url)
-            print(response.status_code)
-            return response.status_code >= 200 and response.status_code < 400
-        except requests.ConnectionError:
-            return False
-
-    def getRequestUrl(self, healthCheckUrl: str):
-        requestUrl = healthCheckUrl
-
-        if self.ports == None:
-            self.loadPorts()
-
-        for i in range(len(self.ports)):
-            requestUrl = requestUrl.replace(f"[{i}]", self.ports[i])
-
-        return f"http://localhost:{requestUrl}"
+    @staticmethod
+    def getAll():
+        return list(map(lambda l: DockerInstance(outPutLine=l), get_all_instances()))
