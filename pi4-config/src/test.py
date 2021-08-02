@@ -27,17 +27,14 @@ serviceList[0].getEnvForPath(
     "/var/www/mapserver/mapserver/public/nue-script.js")
 
 
-serviceList[0].getEnvForPath(
+env=serviceList[0].getEnvForPath(
     "/var/www/mapserver/mapserver/package.json")
 
 
 #logKibana(LogLevel.ERROR, "test")
 
 
-
-
-
-''' docker run \
+command = ''' docker run \
   --name "/docker_mapserver_2" \
   --runtime "runc" \
   --volume "/var/www/mapserver/mapserver:/var/node" \
@@ -115,3 +112,14 @@ serviceList[0].getEnvForPath(
   --interactive \
   "jonathanheindl/rpi-nodets:latest" \
  '''
+
+for key, value in dict(SKIP_NPM=False).items():
+    if value == True:
+        print(f"adding {key}")
+        command = command.replace(
+            "--env", f"--env \"{key}=TRUE\" \\\n\t--env", 1)
+    else:
+        print(f"removin {key}")
+        command = command.replace(f"--env \"{key}=TRUE\"", "")
+
+print(command)

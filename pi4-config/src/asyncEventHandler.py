@@ -18,9 +18,9 @@ class AsyncEventHandler(PatternMatchingEventHandler):
                          ignore_patterns=None, ignore_directories=True, case_sensitive=True)
 
     def addToQueue(self, path):
+        logKibana(LogLevel.INFO, "file change event")
         self.loop.call_soon_threadsafe(
             self.queue.put_nowait, FileChangeEvent(path=path, service=self.service))
-        logKibana(LogLevel.INFO, "file change event")
 
     def on_created(self, event: FileSystemEvent):
         self.addToQueue(event.src_path)

@@ -3,7 +3,7 @@ import re
 import os
 from typing import List
 
-from dockerService import getRunCommand, getStatusForContainer, get_all_instances
+from dockerService import getRunCommand, getStatusForContainer, get_all_instances, removeContainer, restartContainer
 
 
 class DockerInstance:
@@ -39,13 +39,16 @@ class DockerInstance:
             self.dockerRunCommand = getRunCommand(self.name)
         return self.dockerRunCommand
 
-    def deploy(self, additionalEnvs: List[str]):
+    def deploy(self, additionalEnvs: dict):
         command = self.getRunCommand()
 
-        for env in additionalEnvs:
-            print(f"adding {env}")
-            command = command.replace(
-                "--env", f"--env \"{env}=TRUE\" \\\n\t--env", 1)
+        for key, value in additionalEnvs.items():
+            if value == True:
+                print(f"adding {key}")
+                command = command.replace(
+                    "--env", f"--env \"{key}=TRUE\" \\\n\t--env", 1)
+            else:
+                command = command.replace(f"--env \"{key}=TRUE\" \\\n  ", "")
 
         stream = os.popen(command)
         output = stream.read()
@@ -74,6 +77,15 @@ class DockerInstance:
             r'--name "/(.*)"', f'--name "/{newName}"', replacedPorts)
 
         return DockerInstance(name=newName, image=self.image, runCommand=replacedName)
+
+    # def restart(self, envs: List[str]):
+    #    print(f"container restarting {self.name}")
+    #    restartContainer(self.name, envs)
+    #   print("container restarted")
+
+    def remove(self):
+        removeContainer(self.name)
+        print("container removed")
 
     @staticmethod
     def getAll():

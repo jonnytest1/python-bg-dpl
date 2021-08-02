@@ -12,7 +12,6 @@ class NginxService:
     def updateConfig(self, service: "ServiceCl.ServiceCl", instance: "DockerInstance"):
         file = f"{nginxPath}/{service.dockerName}.locations"
 
-        logKibana(LogLevel.INFO, "updating config")
         with open(file, "r") as myfile:
             data: str = myfile.read()
             healthcheckPortIndex = int(service.healthcheckPath[1])
