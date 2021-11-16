@@ -10,7 +10,11 @@ nginxPath = "/etc/nginx/locations"
 class NginxService:
 
     def updateConfig(self, service: "ServiceCl.ServiceCl", instance: "DockerInstance"):
-        file = f"{nginxPath}/{service.dockerName}.locations"
+        locationsPrefix = ""
+        if service.internOnly:
+            locationsPrefix = "-intern"
+
+        file = f"{nginxPath}{locationsPrefix}/{service.dockerName}.locations"
 
         with open(file, "r") as myfile:
             data: str = myfile.read()

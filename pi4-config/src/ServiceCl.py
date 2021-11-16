@@ -14,13 +14,14 @@ class ServiceCl:
 
     reloading = False
 
-    def __init__(self, folderPath: str, pattern: str, dockerName: str, blackListPattern: str, healthcheckPath: str, envDictionary: dict):
+    def __init__(self, folderPath: str, pattern: str, dockerName: str, blackListPattern: str, healthcheckPath: str, envDictionary: dict, internOnly=False):
         self.folderPath = folderPath
         self.pattern = pattern
         self.dockerName = dockerName
         self.blacklistPattern = blackListPattern
         self.healthcheckPath = healthcheckPath
         self.envDictionary = envDictionary
+        self.internOnly = internOnly
 
     async def triggerChange(self, path):
         try:

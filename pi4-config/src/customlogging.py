@@ -4,6 +4,7 @@ import json
 import traceback
 import base64
 from threading import Thread
+import time
 
 
 class LogLevel(Enum):
@@ -15,12 +16,24 @@ class LogLevel(Enum):
 logcounter = 0
 
 
-def doRequest(x):
+def doBackupRequest(x: dict):
+    time.sleep(10)
+    doRequest(x)
 
-    jsonstr = json.dumps(x)
-    encoded = base64.b64encode(jsonstr.encode("utf-8")).decode("utf-8")
-    requests.post(
-        "https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", data=encoded)
+
+def doRequest(x: dict):
+    try:
+        jsonstr = json.dumps(x)
+        encoded = base64.b64encode(jsonstr.encode("utf-8")).decode("utf-8")
+        response = requests.post(
+            "https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", data=encoded)
+
+        if(response.status_code == 502):
+            bT = Thread(target=doBackupRequest, args=[x])
+            bT.start()
+    except requests.exceptions.ConnectionError:
+        bT = Thread(target=doBackupRequest, args=[x])
+        bT.start()
 
 
 def logKibana(level: LogLevel, msg: str, e: Exception = None, args=dict()):

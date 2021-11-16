@@ -1,4 +1,4 @@
-import re
+""" import re
 from customlogging import LogLevel, logKibana
 
 from dockerInstance import DockerInstance
@@ -123,3 +123,9 @@ for key, value in dict(SKIP_NPM=False).items():
         command = command.replace(f"--env \"{key}=TRUE\"", "")
 
 print(command)
+ """
+
+from customlogging import LogLevel, logKibana
+
+
+logKibana(LogLevel.DEBUG, "test")
