@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enum import Enum
 import requests
 import json
@@ -11,9 +12,11 @@ class LogLevel(Enum):
     DEBUG = "DEBUG"
     INFO = "INFO"
     ERROR = "ERROR"
+    WARNING = "WARNING"
 
 
 logcounter = 0
+epoch = datetime.utcfromtimestamp(0)
 
 
 def doBackupRequest(x: dict):
@@ -39,17 +42,30 @@ def doRequest(x: dict):
 def logKibana(level: LogLevel, msg: str, e: Exception = None, args=dict()):
     global logcounter
     logcounter += 1
+    print(msg)
     x = {
         "application": "python filewatcher",
         "Severity": level.name,
         "message": msg,
         "logStack": "".join(traceback.extract_stack().format())
     }
+    for key in args:
+        if args[key] and isinstance(args[key], datetime):
+            val: datetime = args[key]
+            args[key] = val.replace(microsecond=0).astimezone().isoformat()
     x.update(args)
     x['count'] = logcounter
     if e != None:
-        x["error_message"] = ''.join(e.args)
-        x["error_stacktrace"] = ''.join(traceback.format_exception(
-            etype=type(e), value=e, tb=e.__traceback__))
+        if not (isinstance(e, Exception)):
+            x.update(e)
+        else:
+            x["error_message"] = ''.join(e.args)
+            x["error_stacktrace"] = ''.join(traceback.format_exception(
+                etype=type(e), value=e, tb=e.__traceback__))
     t = Thread(target=doRequest, args=[x])
-    t.start()
+    try:
+        t.start()
+    except RuntimeError as e:
+        print("error while logging")
+        time.sleep(1)
+        return logKibana(level, msg, e, args)

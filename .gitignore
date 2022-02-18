@@ -1,2 +1,3 @@
 pi4-config/src/__pycache__/
 pi4-config/src/services.py
+pi4-config/.vscode/sftp.json

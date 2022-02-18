@@ -1,18 +1,32 @@
 import asyncio
 import requests
 from customlogging import LogLevel, logKibana
-
+from enum import Enum
 from dockerInstance import DockerInstance
+from datetime import datetime, timedelta
+
+
+class HealthStatus(Enum):
+    Healthy = "Healthy"
+    UnHealthy = "UnHealthy"
 
 
 class HealthCheck:
 
-    async def checkHealthy(self, healthCheckUrl: str, instance: 'DockerInstance'):
+    healthchecktimeout = 2
+
+    async def checkHealthy(self, healthCheckUrl: str, instance: 'DockerInstance') -> HealthStatus:
         requestUtl = self.getRequestUrl(
             healthCheckUrl=healthCheckUrl, instance=instance)
+        start = datetime.now()
+
         while not self.doHealthCheck(url=requestUtl):
             await asyncio.sleep(1)
+            if start < (datetime.now() - timedelta(minutes=HealthCheck.healthchecktimeout)):
+                return HealthStatus.UnHealthy
             continue
+
+        return HealthStatus.Healthy
 
     def doHealthCheck(self, url: str):
         print(f"checking url at {url}")

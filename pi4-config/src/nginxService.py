@@ -30,15 +30,22 @@ class NginxService:
 
         logKibana(LogLevel.INFO, "updating config",
                   None, dict(config=newConfig))
-        self.reloadConfig()
+        return self.reload_config(data, file)
 
-    def reloadConfig(self):
+    def reload_config(self, previousConfig, file):
         stream = os.popen("service nginx reload")
         output = stream.read()
 
         if len(output) > 0:
-            statusStr = os.popen("systemctl status nginx.service")
+            with open(file, "w") as myfile:
+                myfile.write(previousConfig)
+
+            status_str = os.popen("systemctl status nginx.service")
+            reset_stream = os.popen("service nginx reload")
+            reset_output = reset_stream.read()
             logKibana(LogLevel.ERROR, "nginx didnt start correctly",
-                      None, args=dict(status=statusStr.read()))
+                      None, args=dict(status=status_str.read(), reset_out=reset_output))
+            return False
 
         print("reloaded config")
+        return True

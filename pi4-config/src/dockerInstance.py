@@ -3,7 +3,8 @@ import re
 import os
 from typing import List
 
-from dockerService import getRunCommand, getStatusForContainer, get_all_instances, removeContainer, restartContainer
+from dockerService import getContainerLogs, getRunCommand, getStatusForContainer, get_all_instances, removeContainer, restartContainer
+import json
 
 
 class DockerInstance:
@@ -14,6 +15,8 @@ class DockerInstance:
 
     ports: List[int] = None
 
+    aborted = False
+
     def __init__(self, outPutLine: str = None, name: str = None, image: str = None, runCommand: str = None):
         self.image = image
         self.name = name
@@ -22,13 +25,28 @@ class DockerInstance:
             self.parseOutPutLine(outputLine=outPutLine)
 
     def parseOutPutLine(self, outputLine):
-        parts = re.split("[ ]{2,}", outputLine,)
-        self.name = parts[6]
-        self.image = parts[1]
-        ports = parts[5].split(",")
-        self.ports = []
-        for port in ports:
-            self.ports.append(port.split(":")[1].split("->")[0])
+        try:
+            parts = re.split("[ ]{2,}", outputLine,)
+            nameIndex = 6
+            self.ports = []
+            if "Exited" in outputLine:
+                nameIndex = 5
+            else:
+                if not ("->" in parts[5]):
+                    nameIndex = 5
+                else:
+                    ports = parts[5].split(",")
+                    for port in ports:
+                        # otherwise port is not mapped
+                        if("->" in port):
+                            self.ports.append(
+                                port.split(":")[1].split("->")[0])
+            self.name = parts[nameIndex].strip()
+            self.image = parts[1]
+
+        except Exception as e:
+            print(outputLine)
+            raise e
 
     def loadPorts(self):
         portString = getStatusForContainer(self.name)
@@ -55,6 +73,9 @@ class DockerInstance:
 
         if not len(output) == 65:
             raise SystemError(f"{len(output)}  {output}")
+
+    def toJson(self):
+        return json.dumps(self, default=lambda o: o.__dict__)
 
     def forNewInstance(self, name: str, instanceList: List["DockerInstance"]):
         replacedPorts = re.sub(r'--publish "0.0.0.0:([0-9]*):([0-9]*)/t',
@@ -86,6 +107,9 @@ class DockerInstance:
     def remove(self):
         removeContainer(self.name)
         print("container removed")
+
+    def getLogs(self):
+        return getContainerLogs(self.name)
 
     @staticmethod
     def getAll():

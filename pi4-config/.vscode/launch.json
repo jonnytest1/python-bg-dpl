@@ -10,6 +10,21 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "192.168.178.54", // replace this with remote machine name
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "d:/Jonathan/Projects/python/pi4-config/src",
+                    "remoteRoot": "/var/www/html/python/src"
+                }
+            ],
         }
     ]
 }

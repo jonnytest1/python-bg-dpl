@@ -1,4 +1,5 @@
-
+# /etc/rc.local
 cd /var/www/html/python/src
 echo "running python"
-sudo python3 ./bgDeployment.py
+echo "start" > /home/pi/python-bgdeploy.log
+sudo python3 ./bgDeployment.py >> /home/pi/python-bgdeploy.log

@@ -1,11 +1,15 @@
-from watchdog.observers import Observer
-import asyncio
-from typing import List
-from FileChangeEvent import FileChangeEvent
-from ServiceCl import ServiceCl
-from asyncEventHandler import AsyncEventHandler, EventIterator
-from customlogging import LogLevel, logKibana
 from services import serviceList
+from customlogging import LogLevel, logKibana
+from asyncEventHandler import AsyncEventHandler, EventIterator
+from ServiceCl import ServiceCl
+from FileChangeEvent import FileChangeEvent
+from typing import List
+import asyncio
+from watchdog.observers import Observer
+import debugpy
+
+debugpy.listen(("0.0.0.0", 5678))
+print("Waiting for debugger attach")
 
 observerList: List[Observer] = []
 
