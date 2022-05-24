@@ -1,3 +1,4 @@
+from typing import Union
 from datetime import datetime, timezone
 from enum import Enum
 import requests
@@ -39,11 +40,11 @@ def doRequest(x: dict):
         bT.start()
 
 
-def logKibana(level: LogLevel, msg: str, e: Exception = None, args=dict()):
+def logKibana(level: LogLevel, msg: str, e: Union[Exception, None] = None, args=dict()):
     global logcounter
     logcounter += 1
     print(msg)
-    x = {
+    x: dict[str, Union[str, int]] = {
         "application": "python filewatcher",
         "Severity": level.name,
         "message": msg,

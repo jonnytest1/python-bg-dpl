@@ -23,6 +23,9 @@ class NginxService:
             if not data.startswith("#auto-generated"):
                 data = f"#auto-generated from python blue-green deployment for '{service.dockerName}'\n{data}"
 
+            if instance.ports == None:
+                raise Exception("couldnt load ports")
+
             newConfig = re.sub(
                 r"proxy_pass http://127\.0\.0\.1:([0-9]{3,5})", f"proxy_pass http://127.0.0.1:{instance.ports[healthcheckPortIndex]}", data)
         with open(file, "w") as myfile:

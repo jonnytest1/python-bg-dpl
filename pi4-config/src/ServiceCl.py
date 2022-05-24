@@ -2,6 +2,7 @@ import asyncio
 from datetime import date, datetime
 from os import system
 from HealthCheck import HealthCheck, HealthStatus
+from baseservice import BaseService
 from customlogging import LogLevel, logKibana
 from dockerInstance import DockerInstance
 import re
@@ -10,7 +11,7 @@ import jsonpickle
 allinstances = []
 
 
-class ServiceCl:
+class ServiceCl(BaseService):
 
     instances = []
 
@@ -18,9 +19,8 @@ class ServiceCl:
 
     lastTrigger = datetime.fromtimestamp(0)
 
-    def __init__(self, folderPath: str, pattern: str, dockerName: str, blackListPattern: str, healthcheckPath: str, envDictionary: dict, internOnly=False):
-        self.folderPath = folderPath
-        self.pattern = pattern
+    def __init__(self, folder_path: str, pattern: str, dockerName: str, blackListPattern: str, healthcheckPath: str, envDictionary: dict, internOnly=False):
+        super().__init__(folder_path, pattern)
         self.dockerName = dockerName
         self.blacklistPattern = blackListPattern
         self.healthcheckPath = healthcheckPath
@@ -52,7 +52,7 @@ class ServiceCl:
             logKibana(
                 LogLevel.ERROR, f"error restarting container {self.dockerName}", exc, dict(
                     path=path,
-                    fPath=self.folderPath,
+                    fPath=self.folder_path,
                     healthPath=self.healthcheckPath
                 ))
             raise exc
@@ -87,6 +87,11 @@ class ServiceCl:
         global allinstances
 
         instance = self.getCurrentInstance()
+        if instance == None:
+            logKibana(
+                LogLevel.ERROR, f"didnt get current instance for {self.dockerName}",
+            )
+            return
         print(f"current instance name {instance.name}")
         # prefetch for cache
         instance.getRunCommand()

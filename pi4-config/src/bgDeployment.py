@@ -1,9 +1,11 @@
+from ctypes import Union
+from baseservice import BaseService
 from services import serviceList
 from customlogging import LogLevel, logKibana
 from asyncEventHandler import AsyncEventHandler, EventIterator
 from ServiceCl import ServiceCl
 from FileChangeEvent import FileChangeEvent
-from typing import List
+from typing import Coroutine, List, Union
 import asyncio
 from watchdog.observers import Observer
 import debugpy
@@ -25,17 +27,17 @@ async def consume(queue: asyncio.Queue):
     logKibana(LogLevel.ERROR, "event loop stopped")
 
 
-def watch(service: ServiceCl, queue: asyncio.Queue, loop: asyncio.BaseEventLoop):
+def watch(service: BaseService, queue: asyncio.Queue, loop: asyncio.BaseEventLoop):
     # Watch directory for changes
     handler = AsyncEventHandler(service, queue, loop)
 
     observer = Observer()
-    observer.schedule(handler, service.folderPath, recursive=True)
+    observer.schedule(handler, service.folder_path, recursive=True)
     observer.start()
     logKibana(LogLevel.INFO, "observer started")
 
 
-futureList = [
+futureList: list[Union[asyncio.Future, Coroutine]] = [
     consume(queue)
 ]
 

@@ -1,4 +1,5 @@
 import asyncio
+from msilib.schema import Error
 import requests
 from customlogging import LogLevel, logKibana
 from enum import Enum
@@ -41,8 +42,9 @@ class HealthCheck:
 
         if instance.ports == None:
             instance.loadPorts()
-
+        if instance.ports == None:
+            raise Exception("couldnt load ports")
         for i in range(len(instance.ports)):
-            requestUrl = requestUrl.replace(f"[{i}]", instance.ports[i])
+            requestUrl = requestUrl.replace(f"[{i}]", str(instance.ports[i]))
 
         return f"http://localhost:{requestUrl}"

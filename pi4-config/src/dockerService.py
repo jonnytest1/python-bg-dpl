@@ -33,14 +33,14 @@ def removeContainer(containerName: str):
 
     if output.strip() != containerName:
         logKibana(LogLevel.ERROR, "stopping failed", args=dict(output=output))
-        raise "stopping failed"
+        raise Exception("stopping failed")
 
     stream = os.popen(f'docker rm {containerName}')
     output = stream.read().strip()
 
     if output != containerName:
         logKibana(LogLevel.ERROR, "removing failed", args=dict(output=output))
-        raise "removing failed"
+        raise Exception("removing failed")
 
 
 def restartContainer(containerName: str, envs: List[str]):
@@ -50,7 +50,8 @@ def restartContainer(containerName: str, envs: List[str]):
     output = stream.read().strip()
 
     if output != containerName:
-        logKibana(LogLevel.ERROR, "restarting failed", dict(output=output))
-        raise "restarting failed"
+        logKibana(LogLevel.ERROR, "restarting failed",
+                  args=dict(output=output))
+        raise Exception("restarting failed")
 
     return

@@ -1,10 +1,17 @@
 #from nginxService import NginxService
 #from ServiceCl import ServiceCl
+from ServiceCl import ServiceCl
 from services import serviceList
 
 
 service = serviceList[0]
+if not isinstance(service, ServiceCl):
+    raise Exception("error")
+
 instance = service.getCurrentInstance()
+
+if instance == None:
+    raise Exception("error")
 # print(instance.getRunCommand())
 
 #newInstance = instance.forNewInstance(service.dockerName, service.instances)

@@ -1,7 +1,7 @@
 
 import re
 import os
-from typing import List
+from typing import List, Union
 
 from dockerService import getContainerLogs, getRunCommand, getStatusForContainer, get_all_instances, removeContainer, restartContainer
 import json
@@ -13,14 +13,20 @@ class DockerInstance:
 
     dockerRunCommand: str
 
-    ports: List[int] = None
+    ports: Union[List[int], None] = None
 
     aborted = False
 
-    def __init__(self, outPutLine: str = None, name: str = None, image: str = None, runCommand: str = None):
-        self.image = image
-        self.name = name
-        self.dockerRunCommand = runCommand
+    def __init__(self, outPutLine: Union[str, None] = None,
+                 name: Union[str, None] = None, image: Union[str, None] = None,
+                 runCommand: Union[str, None] = None):
+        if image != None:
+            self.image = image
+        if name != None:
+            self.name = name
+
+        if runCommand != None:
+            self.dockerRunCommand = runCommand
         if not outPutLine == None:
             self.parseOutPutLine(outputLine=outPutLine)
 

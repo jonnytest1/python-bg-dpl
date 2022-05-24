@@ -4,12 +4,13 @@ import asyncio
 from FileChangeEvent import FileChangeEvent
 
 from ServiceCl import ServiceCl
+from baseservice import BaseService
 from customlogging import LogLevel, logKibana
 
 
 class AsyncEventHandler(PatternMatchingEventHandler):
 
-    def __init__(self, service: ServiceCl, queue: asyncio.Queue,
+    def __init__(self, service: BaseService, queue: asyncio.Queue,
                  loop: Optional[asyncio.BaseEventLoop] = None):
         self.queue = queue
         self.service = service
@@ -18,8 +19,9 @@ class AsyncEventHandler(PatternMatchingEventHandler):
                          ignore_patterns=None, ignore_directories=True, case_sensitive=True)
 
     def addToQueue(self, path):
-        self.loop.call_soon_threadsafe(
-            self.queue.put_nowait, FileChangeEvent(path=path, service=self.service))
+        if(self.loop != None):
+            self.loop.call_soon_threadsafe(
+                self.queue.put_nowait, FileChangeEvent(path=path, service=self.service))
 
     def on_created(self, event: FileSystemEvent):
         self.addToQueue(event.src_path)
