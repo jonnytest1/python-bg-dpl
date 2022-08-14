@@ -1,13 +1,14 @@
-from datetime import date, datetime
-import json
+import asyncio
+import base64
 from HealthCheck import HealthCheck
-from customlogging import LogLevel, logKibana
 from dockerInstance import DockerInstance
 import re
-from services import serviceList
+from servicebackup import BackupService
 # logKibana(LogLevel.DEBUG, "test")
 
+from services import serviceList
 
+print(serviceList)
 instance = DockerInstance(
     outPutLine='122b6725fd0d   jonathanheindl/rpi-nodets          "/bin/sh -c /node.sh"    10 hours ago   Up 9 hours                                                                                         docker_sound')
 
@@ -28,3 +29,11 @@ if smInst.ports == None or len(smInst.ports) != 3:
 
 test = f"new container {instance.name} is unhealthy after {HealthCheck.healthchecktimeout} minutes"
 print(re.sub("test", "123", "testdef\nabc\ntesthij"))
+
+
+bS = BackupService(folder_path="/home/webdav/content", pattern="*")
+res = bS.triggerChange(
+    "D:\\Jonathan\\Projects\\python\\pi4-config\\src\\test.py")
+
+
+asyncio.run(res)

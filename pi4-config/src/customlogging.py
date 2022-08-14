@@ -1,5 +1,5 @@
 from typing import Union
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 import requests
 import json

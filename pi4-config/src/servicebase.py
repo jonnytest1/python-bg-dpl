@@ -1,4 +1,5 @@
-from xmlrpc.client import Boolean
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
 class BaseService:
@@ -7,6 +8,6 @@ class BaseService:
         self.folder_path = path
         self.pattern = pattern
 
-    async def triggerChange(self, path: str) -> Boolean:
+    async def triggerChange(self, path: str) -> bool:
         # interface method
         raise NotImplementedError("missing implementation for triggerChange")

@@ -20,8 +20,8 @@ if instance == None:
 
 newInstance = instance.forNewInstance(service.dockerName, service.instances)
 service.instances.append(newInstance)
-print(newInstance.getRunCommand())
-command = newInstance.getRunCommand()
+print(newInstance.get_run_command())
+command = newInstance.get_run_command()
 
 for key, value in dict(SKIP_NPM=False).items():
     if value == True:

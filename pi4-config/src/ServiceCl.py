@@ -1,8 +1,7 @@
 import asyncio
-from datetime import date, datetime
-from os import system
+from datetime import datetime
 from HealthCheck import HealthCheck, HealthStatus
-from baseservice import BaseService
+from servicebase import BaseService
 from customlogging import LogLevel, logKibana
 from dockerInstance import DockerInstance
 import re
@@ -94,7 +93,7 @@ class ServiceCl(BaseService):
             return
         print(f"current instance name {instance.name}")
         # prefetch for cache
-        instance.getRunCommand()
+        instance.get_run_command()
         newInstance = instance.forNewInstance(
             self.dockerName, self.instances+allinstances)
         self.instances.append(newInstance)

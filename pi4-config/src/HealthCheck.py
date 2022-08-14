@@ -1,7 +1,5 @@
 import asyncio
-from msilib.schema import Error
 import requests
-from customlogging import LogLevel, logKibana
 from enum import Enum
 from dockerInstance import DockerInstance
 from datetime import datetime, timedelta

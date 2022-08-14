@@ -3,7 +3,7 @@ import re
 import os
 from typing import List, Union
 
-from dockerService import getContainerLogs, getRunCommand, getStatusForContainer, get_all_instances, removeContainer, restartContainer
+from dockerService import getContainerLogs, get_run_command, getStatusForContainer, get_all_instances, removeContainer, restartContainer
 import json
 
 
@@ -11,7 +11,7 @@ class DockerInstance:
     name: str
     image: str
 
-    dockerRunCommand: str
+    docker_run_command: Union[str, None] = None
 
     ports: Union[List[int], None] = None
 
@@ -26,7 +26,7 @@ class DockerInstance:
             self.name = name
 
         if runCommand != None:
-            self.dockerRunCommand = runCommand
+            self.docker_run_command = runCommand
         if not outPutLine == None:
             self.parseOutPutLine(outputLine=outPutLine)
 
@@ -46,7 +46,7 @@ class DockerInstance:
                         # otherwise port is not mapped
                         if("->" in port):
                             self.ports.append(
-                                port.split(":")[1].split("->")[0])
+                                int(port.split(":")[-1].split("->")[0]))
             self.name = parts[nameIndex].strip()
             self.image = parts[1]
 
@@ -58,13 +58,13 @@ class DockerInstance:
         portString = getStatusForContainer(self.name)
         self.parseOutPutLine(portString)
 
-    def getRunCommand(self):
-        if self.dockerRunCommand is None:
-            self.dockerRunCommand = getRunCommand(self.name)
-        return self.dockerRunCommand
+    def get_run_command(self):
+        if self.docker_run_command is None:
+            self.docker_run_command = get_run_command(self.name)
+        return self.docker_run_command
 
     def deploy(self, additionalEnvs: dict):
-        command = self.getRunCommand()
+        command = self.get_run_command()
 
         for key, value in additionalEnvs.items():
             if value == True:
@@ -85,7 +85,7 @@ class DockerInstance:
 
     def forNewInstance(self, name: str, instanceList: List["DockerInstance"]):
         replacedPorts = re.sub(r'--publish "0.0.0.0:([0-9]*):([0-9]*)/t',
-                               r'--publish "0.0.0.0:20000-30000:\g<2>/t', self.getRunCommand())
+                               r'--publish "0.0.0.0:20000-30000:\g<2>/t', self.get_run_command())
 
         suffix = 2
         for instance in instanceList:

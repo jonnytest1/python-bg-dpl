@@ -10,7 +10,7 @@ def get_all_instances():
     return lines[1:]
 
 
-def getRunCommand(containername: str):
+def get_run_command(containername: str):
     stream = os.popen(
         'docker inspect --format "$(cat ./dockerrun.tpl)" '+containername)
     return stream.read()

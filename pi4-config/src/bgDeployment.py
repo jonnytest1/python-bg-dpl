@@ -1,5 +1,5 @@
 from ctypes import Union
-from baseservice import BaseService
+from servicebase import BaseService
 from services import serviceList
 from customlogging import LogLevel, logKibana
 from asyncEventHandler import AsyncEventHandler, EventIterator
@@ -10,8 +10,13 @@ import asyncio
 from watchdog.observers import Observer
 import debugpy
 
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach")
+try:
+    debugpy.listen(("0.0.0.0", 5678))
+    print("Waiting for debugger attach")
+except:
+    debugpy.listen(("0.0.0.0", 5679))
+    print("Waiting for debugger attach on fallback port 5679")
+    pass
 
 observerList: List[Observer] = []
 
@@ -22,7 +27,7 @@ queue = asyncio.Queue(loop=loop)
 async def consume(queue: asyncio.Queue):
     async for event in EventIterator(queue):
         evt: FileChangeEvent = event
-        loop.create_task(evt.service.triggerChange(event.path))
+        loop.create_task(evt.service.triggerChange(evt.path))
 
     logKibana(LogLevel.ERROR, "event loop stopped")
 
@@ -37,7 +42,7 @@ def watch(service: BaseService, queue: asyncio.Queue, loop: asyncio.BaseEventLoo
     logKibana(LogLevel.INFO, "observer started")
 
 
-futureList: list[Union[asyncio.Future, Coroutine]] = [
+futureList: List[Union[asyncio.Future, Coroutine]] = [
     consume(queue)
 ]
 
