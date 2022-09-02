@@ -4,3 +4,6 @@ pi4-config/.vscode/sftp.json
 pi4-config/keys
 pi4-config/UNKNOWN.egg-info
 pi4-config/dist
+pi4-config/cert
+pi4-config/test
+.history

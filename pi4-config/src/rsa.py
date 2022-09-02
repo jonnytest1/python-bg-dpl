@@ -5,9 +5,13 @@ from cryptography.hazmat.primitives import serialization, hashes
 import base64
 import os
 
+pubKeyPath = os.path.realpath(os.path.join(
+    os.path.dirname(__file__), "../cert/public.pem"))
+print(pubKeyPath)
+
 
 def encryptWithPublicKey(data: str):
-    with open("D:\\Jonathan\\Projects\\node\\backup\\certs\\7ac704ad-8c42-478d-b9e6-c0024f41abac\\public.pem", "rb") as pub:
+    with open(pubKeyPath, "rb") as pub:
 
         pubKey = serialization.load_pem_public_key(pub.read())
         if (isinstance(pubKey, rsa.RSAPublicKey)):
@@ -19,7 +23,6 @@ def encryptWithPublicKey(data: str):
                 label=None
             ))
             base64_bytes = base64.b64encode(encrypted).decode("ascii")
-            print(base64_bytes)
             return base64_bytes
 
 

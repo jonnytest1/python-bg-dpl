@@ -31,7 +31,13 @@ test = f"new container {instance.name} is unhealthy after {HealthCheck.healthche
 print(re.sub("test", "123", "testdef\nabc\ntesthij"))
 
 
-bS = BackupService(folder_path="/home/webdav/content", pattern="*")
+bS = serviceList[2]
+if not isinstance(bS, BackupService):
+    raise Exception("wrong type")
+if not bS.is_blacklisted("/home/webdav/content/passwort.kdbx.YDrbsF"):
+    raise Exception("blacklist didnt work")
+
+
 res = bS.triggerChange(
     "D:\\Jonathan\\Projects\\python\\pi4-config\\src\\test.py")
 

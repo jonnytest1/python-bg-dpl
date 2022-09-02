@@ -9,7 +9,7 @@ from typing import Coroutine, List, Union
 import asyncio
 from watchdog.observers import Observer
 import debugpy
-
+print("python start")
 try:
     debugpy.listen(("0.0.0.0", 5678))
     print("Waiting for debugger attach")
@@ -39,7 +39,7 @@ def watch(service: BaseService, queue: asyncio.Queue, loop: asyncio.BaseEventLoo
     observer = Observer()
     observer.schedule(handler, service.folder_path, recursive=True)
     observer.start()
-    logKibana(LogLevel.INFO, "observer started")
+    logKibana(LogLevel.INFO, "observer started",args=dict(path=service.folder_path))
 
 
 futureList: List[Union[asyncio.Future, Coroutine]] = [

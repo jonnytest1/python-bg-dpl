@@ -24,7 +24,7 @@ class AsyncEventHandler(PatternMatchingEventHandler):
                          ignore_patterns=None, ignore_directories=True, case_sensitive=True)
 
     def addToQueue(self, path):
-        if(self.loop != None):
+        if (self.loop != None):
             self.loop.call_soon_threadsafe(
                 self.queue.put_nowait, FileChangeEvent(path=path, service=self.service))
 
@@ -39,7 +39,7 @@ class AsyncEventHandler(PatternMatchingEventHandler):
         self.addToQueue(event.src_path)
 
     def on_modified(self, event):
-        if(self.last_event_path == event.src_path and self.last_event_time > datetime.now() - timedelta(milliseconds=50)):
+        if (self.last_event_path == event.src_path and self.last_event_time > datetime.now() - timedelta(milliseconds=50)):
             return
 
         self.last_event_path = event.src_path
