@@ -5,10 +5,10 @@ from customlogging import LogLevel, logKibana
 from asyncEventHandler import AsyncEventHandler, EventIterator
 from ServiceCl import ServiceCl
 from FileChangeEvent import FileChangeEvent
-from typing import Coroutine, List, Union, Protocol
+from typing import Coroutine, List, Union
 import asyncio
 from watchdog.observers import Observer
-from watchdog.observers.api import BaseObserverSubclassCallable
+from watchdog.observers.api import BaseObserver
 import debugpy
 from dotenv import load_dotenv
 
@@ -21,7 +21,7 @@ except:
     print("Waiting for debugger attach on fallback port 5679")
     pass
 load_dotenv()
-observerList: "list[BaseObserverSubclassCallable]" = []
+observerList: "list[BaseObserver]" = []
 
 loop = asyncio.get_event_loop()
 queue = asyncio.Queue(loop=loop)
