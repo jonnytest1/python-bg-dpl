@@ -72,15 +72,21 @@ class BackupService(BaseService):
                     base64.b64encode(iv).decode(),
                     timestamp=changeTs
                 )))
-
+            target = os.environ.get("BACKUP_TARGET")
+            if target is None:
+                logKibana(LogLevel.ERROR, f"missing backup target")
+                return False
             response = requests.post(
-            "http://localhost:61234/data", json=dict(data=encoded_storage_request))
-
+                os.environ["BACKUP_TARGET"], json=dict(data=encoded_storage_request))
             logKibana(LogLevel.INFO, f"backed up file",
-                      args=dict(path=path,response=response.text))
+                      args=dict(path=path, response=response.text))
             print(response.text)
             return True
         except FileNotFoundError as e:
             print("didnt find " + path)
             # assumed to be a very short lived temporary file
+            return False
+        except requests.exceptions.ConnectionError:
+            logKibana(LogLevel.ERROR, f"failed connecting on backup",
+                      args=dict(path=path))
             return False

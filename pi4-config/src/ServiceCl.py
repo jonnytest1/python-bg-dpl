@@ -91,6 +91,9 @@ class ServiceCl(BaseService):
                 LogLevel.ERROR, f"didnt get current instance for {self.dockerName}",
             )
             return
+        logKibana(
+                LogLevel.INFO, f"restarting container {self.dockerName}",
+            )
         print(f"current instance name {instance.name}")
         # prefetch for cache
         instance.get_run_command()
@@ -131,7 +134,13 @@ class ServiceCl(BaseService):
 
         instance.remove()
         instance.deploy(environments)
-        await HealthCheck().checkHealthy(self.healthcheckPath, instance)
+        
+        swithcedBackSTatus=await HealthCheck().checkHealthy(self.healthcheckPath, instance)
+
+        if swithcedBackSTatus == HealthStatus.UnHealthy:
+            logKibana(
+                LogLevel.ERROR, f"switched back container {instance.name} is unhealthy after {HealthCheck.healthchecktimeout} minutes",
+                args=dict(logoutput=instance.getLogs()))
         logKibana(LogLevel.INFO,
                   f"restartet container {instance.name} is healthy")
 

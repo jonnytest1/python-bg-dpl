@@ -7,6 +7,7 @@ import traceback
 import base64
 from threading import Thread
 import time
+import os
 
 
 class LogLevel(Enum):
@@ -29,14 +30,20 @@ def doRequest(x: dict):
     try:
         jsonstr = json.dumps(x)
         encoded = base64.b64encode(jsonstr.encode("utf-8")).decode("utf-8")
-        response = requests.post(
-            "https://pi4.e6azumuvyiabvs9s.myfritz.net/tm/libs/log/index.php", data=encoded)
+        logging_endpoint = os.environ.get(
+            "LOGGING_ENDPOINT")
+        if (logging_endpoint is None):
+            print("missing log endpoint")
+            return
+        response = requests.post(logging_endpoint, data=encoded)
 
-        if(response.status_code == 502):
-            bT = Thread(target=doBackupRequest, args=[x])
+        if (response.status_code == 502):
+            bT = Thread(target=doBackupRequest, args=[
+                        x], name="logbackupthread")
             bT.start()
     except requests.exceptions.ConnectionError:
-        bT = Thread(target=doBackupRequest, args=[x])
+        bT = Thread(target=doBackupRequest, args=[
+                    x], name="logbackupthreadconerror")
         bT.start()
 
 
@@ -57,13 +64,19 @@ def logKibana(level: LogLevel, msg: str, e: Union[Exception, None] = None, args=
     x.update(args)
     x['count'] = logcounter
     if e != None:
+        p_exception = e
         if not (isinstance(e, Exception)):
             x.update(e)
         else:
-            x["error_message"] = ''.join(e.args)
             x["error_stacktrace"] = ''.join(traceback.format_exception(
                 etype=type(e), value=e, tb=e.__traceback__))
-    t = Thread(target=doRequest, args=[x])
+            try:
+                x["error_message"] = ''.join(p_exception.args)
+            except Exception:
+                for i in range(len(p_exception.args)):
+                    x["error_arg"+str(i)] = str(p_exception.args[i])
+
+    t = Thread(target=doRequest, args=[x], name="logthread")
     try:
         t.start()
     except RuntimeError as e:

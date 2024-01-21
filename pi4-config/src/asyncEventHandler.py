@@ -44,6 +44,7 @@ class AsyncEventHandler(PatternMatchingEventHandler):
 
         self.last_event_path = event.src_path
         self.last_event_time = datetime.now()
+        print(self.last_event_time)
         print("modified")
         print(event)
         self.addToQueue(event.src_path)
