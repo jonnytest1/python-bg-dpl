@@ -1,0 +1,3 @@
+# debugpy
+# websocket-client
+# evdev
